@@ -96,7 +96,7 @@ if st.button("Generar predicción"):
     )
     
     # Mostrar el gráfico de LIME
-    st.components.v1.html(exp.as_html(), height=1200)
+    st.components.v1.html(exp.as_html(), height=2000)
 
     # Mostrar la predicción del modelo
     st.write("**Probabilidad de ROS:**", model.predict_proba(new_data)[0][1])
