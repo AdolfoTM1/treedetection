@@ -96,8 +96,12 @@ if st.button("Generar predicción"):
         num_features=len(X_train.columns)  # Incluir todas las características en la explicación
     )
     
+     # Modificar el HTML para reducir el espacio entre la gráfica y la leyenda
+    html_code = exp.as_html()
+    html_code = html_code.replace('<div class="lime top_div">', '<div class="lime top_div" style="margin-bottom: 0px;">')  # Reduce el margen inferior del div superior
+
     # Mostrar el gráfico de LIME (más grande)
-    st.components.v1.html(exp.as_html(), height=1200)
+    st.components.v1.html(html_code, height=1200)
 
 # Mostrar la predicción del modelo (fuera del bloque if)
 st.write("**Probabilidad de ROS:**", model.predict_proba(new_data)[0][1])
