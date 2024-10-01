@@ -17,7 +17,9 @@ data = {
     'transaction_amount': np.random.lognormal(mean=3, sigma=1, size=n_samples),
     'transaction_hour': np.random.randint(0, 24, size=n_samples),
     'is_weekend': np.random.choice([0, 1], size=n_samples),
-    'inusualidad': np.random.choice([0, 1], size=n_samples)
+    'inusualidad': np.random.choice([0, 1], size=n_samples),
+    'location': np.random.choice(['urban', 'suburban', 'rural'], size=n_samples),
+    'payment_method': np.random.choice(['credit_card', 'debit_card', 'paypal'], size=n_samples),
 }
 
 # Generar variable objetivo (ROS)
@@ -28,6 +30,9 @@ data['ROS'] = (
 ).astype(int)
 
 df = pd.DataFrame(data)
+
+# Convertir variables categóricas a dummies (variables ficticias)
+df = pd.get_dummies(df, columns=['location', 'payment_method'], drop_first=True)
 
 # Separar características y variable objetivo
 X = df.drop('ROS', axis=1)
@@ -47,11 +52,9 @@ explainer = lime_tabular.LimeTabularExplainer(
     class_names=['No ROS', 'ROS'],
     mode='classification'
 )
-# --- Configurar el diseño a wide ---
-st.set_page_config(layout="wide")
-
 
 # Interfaz de Streamlit
+st.set_page_config(layout="wide")
 st.title("Predicción de ROS con LIME")
 
 # Inputs del usuario
@@ -60,32 +63,27 @@ transaction_hour = st.number_input("Hora de la transacción (0-23):", min_value=
 is_weekend = st.selectbox("¿Es fin de semana?", ["No", "Sí"])
 inusualidad = st.selectbox("¿Es una transacción inusual?", ["No", "Sí"])
 
-# --- Nuevos campos de input ---
 location = st.selectbox("Ubicación:", ["Urbana", "Suburbana", "Rural"])
 payment_method = st.selectbox("Método de pago:", ["Tarjeta de crédito", "Tarjeta de débito", "PayPal"])
-# --- ---
 
 # Convertir inputs a valores numéricos
 is_weekend = 1 if is_weekend == "Sí" else 0
 inusualidad = 1 if inusualidad == "Sí" else 0
 
 # Convertir variables categóricas a dummies
-location_suburban = 1 if location == "Suburbana" else 0
-location_rural = 1 if location == "Rural" else 0
-payment_method_debit_card = 1 if payment_method == "Tarjeta de débito" else 0
-payment_method_paypal = 1 if payment_method == "PayPal" else 0
+location_dummies = pd.get_dummies(pd.Series(location), prefix='location')
+payment_method_dummies = pd.get_dummies(pd.Series(payment_method), prefix='payment_method')
 
 # Crear DataFrame con los inputs
 new_data = pd.DataFrame({
     'transaction_amount': [transaction_amount],
     'transaction_hour': [transaction_hour],
     'is_weekend': [is_weekend],
-    'inusualidad': [inusualidad],
-    'location_suburban': [location_suburban],
-    'location_rural': [location_rural],
-    'payment_method_debit_card': [payment_method_debit_card],
-    'payment_method_paypal': [payment_method_paypal]
+    'inusualidad': [inusualidad]
 })
+
+# Agregar dummies al DataFrame
+new_data = pd.concat([new_data, location_dummies, payment_method_dummies], axis=1)
 
 # Asegurarse de que las columnas coincidan con el modelo
 new_data = new_data.reindex(columns=X_train.columns, fill_value=0)
@@ -94,13 +92,9 @@ new_data = new_data.reindex(columns=X_train.columns, fill_value=0)
 if st.button("Generar predicción"):
     exp = explainer.explain_instance(
         data_row=new_data.iloc[0],
-        predict_fn=model.predict_proba
+        predict_fn=model.predict_proba,
+        num_features=len(X_train.columns)  # Incluir todas las características en la explicación
     )
     
-    # Mostrar el gráfico de LIME
-    st.components.v1.html(exp.as_html(), height=2000)
-
-    # Mostrar la predicción del modelo
-    st.write("**Probabilidad de ROS:**", model.predict_proba(new_data)[0][1])
-
-    st.write("*Las predicciones vertidas deben ser contrastadas y representan únicamente una herramienta para la toma de decisiones.")
+    # Mostrar el gráfico de LIME (más grande)
+    st.components.v1.html(exp.as_html(), height=1200)
