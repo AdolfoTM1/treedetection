@@ -98,3 +98,9 @@ if st.button("Generar predicción"):
     
     # Mostrar el gráfico de LIME (más grande)
     st.components.v1.html(exp.as_html(), height=1200)
+
+# Mostrar la predicción del modelo (fuera del bloque if)
+st.write("**Probabilidad de ROS:**", model.predict_proba(new_data)[0][1])
+
+# Mostrar el descargo de responsabilidad (fuera del bloque if)
+st.write("*Las predicciones vertidas deben ser contrastadas y representan únicamente una herramienta para la toma de decisiones.")
