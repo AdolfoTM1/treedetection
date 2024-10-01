@@ -47,6 +47,9 @@ explainer = lime_tabular.LimeTabularExplainer(
     class_names=['No ROS', 'ROS'],
     mode='classification'
 )
+# --- Configurar el diseño a wide ---
+st.set_page_config(layout="wide")
+
 
 # Interfaz de Streamlit
 st.title("Predicción de ROS con LIME")
@@ -86,9 +89,6 @@ new_data = pd.DataFrame({
 
 # Asegurarse de que las columnas coincidan con el modelo
 new_data = new_data.reindex(columns=X_train.columns, fill_value=0)
-
-# --- Configurar el diseño a wide ---
-st.set_page_config(layout="wide")
 
 # Explicar la predicción
 if st.button("Generar predicción"):
