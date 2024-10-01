@@ -88,6 +88,9 @@ new_data = pd.concat([new_data, location_dummies, payment_method_dummies], axis=
 # Asegurarse de que las columnas coincidan con el modelo
 new_data = new_data.reindex(columns=X_train.columns, fill_value=0)
 
+# Mostrar el descargo de responsabilidad ANTES del botón
+st.write("*Las predicciones vertidas deben ser contrastadas y representan únicamente una herramienta para la toma de decisiones.")
+
 # Explicar la predicción
 if st.button("Generar predicción"):
     exp = explainer.explain_instance(
