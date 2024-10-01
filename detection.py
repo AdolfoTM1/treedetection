@@ -55,7 +55,7 @@ explainer = lime_tabular.LimeTabularExplainer(
 
 # Interfaz de Streamlit
 st.set_page_config(layout="wide")
-st.title("Predicción de ROS con LIME")
+st.title("TREE DETECTION")
 
 # Inputs del usuario
 transaction_amount = st.number_input("Monto de la transacción:", min_value=0.0)
