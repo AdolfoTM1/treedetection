@@ -57,17 +57,36 @@ transaction_hour = st.number_input("Hora de la transacción (0-23):", min_value=
 is_weekend = st.selectbox("¿Es fin de semana?", ["No", "Sí"])
 inusualidad = st.selectbox("¿Es una transacción inusual?", ["No", "Sí"])
 
+# --- Nuevos campos de input ---
+location = st.selectbox("Ubicación:", ["Urbana", "Suburbana", "Rural"])
+payment_method = st.selectbox("Método de pago:", ["Tarjeta de crédito", "Tarjeta de débito", "PayPal"])
+# --- ---
+
 # Convertir inputs a valores numéricos
 is_weekend = 1 if is_weekend == "Sí" else 0
 inusualidad = 1 if inusualidad == "Sí" else 0
+
+# Convertir variables categóricas a dummies
+location_suburban = 1 if location == "Suburbana" else 0
+location_rural = 1 if location == "Rural" else 0
+payment_method_debit_card = 1 if payment_method == "Tarjeta de débito" else 0
+payment_method_paypal = 1 if payment_method == "PayPal" else 0
 
 # Crear DataFrame con los inputs
 new_data = pd.DataFrame({
     'transaction_amount': [transaction_amount],
     'transaction_hour': [transaction_hour],
     'is_weekend': [is_weekend],
-    'inusualidad': [inusualidad]
+    'inusualidad': [inusualidad],
+    'location_suburban': [location_suburban],
+    'location_rural': [location_rural],
+    'payment_method_debit_card': [payment_method_debit_card],
+    'payment_method_paypal': [payment_method_paypal]
 })
+
+# Asegurarse de que las columnas coincidan con el modelo
+new_data = new_data.reindex(columns=X_train.columns, fill_value=0)
+
 
 # Explicar la predicción
 if st.button("Generar predicción"):
@@ -77,7 +96,7 @@ if st.button("Generar predicción"):
     )
     
     # Mostrar el gráfico de LIME
-    st.components.v1.html(exp.as_html(), height=800)
+    st.components.v1.html(exp.as_html(), height=1200)
 
     # Mostrar la predicción del modelo
     st.write("**Probabilidad de ROS:**", model.predict_proba(new_data)[0][1])
